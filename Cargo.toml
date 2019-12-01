@@ -1,0 +1,9 @@
+[package]
+name = "adventofcode-2019"
+version = "0.1.0"
+authors = ["Rémi Garde <remi.garde@free.fr>"]
+
+[dependencies]
+aoc-runner = "^0.2"
+aoc-runner-derive = "^0.2"
+rayon = "^1.2"
