@@ -1,14 +1,14 @@
-use std::str::FromStr;
 use rayon::prelude::*;
+use std::str::FromStr;
 
 #[aoc(day1, part1)]
 fn part1(input: &str) -> usize {
     input
         .par_lines()
         .map(|l| {
-                let mass = usize::from_str(l).unwrap();
-                mass / 3 - 2
-            })
+            let mass = usize::from_str(l).unwrap();
+            mass / 3 - 2
+        })
         .sum()
 }
 
@@ -17,17 +17,16 @@ fn part2(input: &str) -> usize {
     input
         .par_lines()
         .map(|l| {
-                let mut mass = usize::from_str(l).unwrap();
-                let mut fuel = 0;
-                while mass > 8 {
-                    mass = mass / 3 - 2;
-                    fuel += mass;
-                }
-                fuel
-             })
+            let mut mass = usize::from_str(l).unwrap();
+            let mut fuel = 0;
+            while mass > 8 {
+                mass = mass / 3 - 2;
+                fuel += mass;
+            }
+            fuel
+        })
         .sum()
 }
-
 
 #[cfg(test)]
 mod tests {
