@@ -1,5 +1,4 @@
 use super::computer::*;
-use rayon::prelude::*;
 use std::str::FromStr;
 
 #[aoc_generator(day5)]
@@ -16,6 +15,17 @@ pub fn part1(input: &Vec<isize>) -> isize {
         ip: 0,
         memory: input.clone(),
         inputs: std::iter::once(1),
+        outputs: Vec::new(),
+    };
+    computer.run().expect("Error while running program")
+}
+
+#[aoc(day5, part2)]
+pub fn part2(input: &Vec<isize>) -> isize {
+    let mut computer = Computer {
+        ip: 0,
+        memory: input.clone(),
+        inputs: std::iter::once(5),
         outputs: Vec::new(),
     };
     computer.run().expect("Error while running program")
