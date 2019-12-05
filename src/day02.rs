@@ -19,6 +19,7 @@ fn part1(inpute: &Vec<isize>) -> isize {
         ip: 0,
         memory: input,
         inputs: None.into_iter(),
+        outputs: Vec::new(),
     };
     computer.run().unwrap();
     computer.memory[0]
@@ -36,6 +37,7 @@ fn part2(inpute: &Vec<isize>) -> isize {
                 ip: 0,
                 memory: input,
                 inputs: None.into_iter(),
+                outputs: Vec::new(),
             };
             if computer.run().is_ok() {
                 if computer.memory[0] == 19690720 {
@@ -67,6 +69,7 @@ mod tests {
             ip: 0,
             memory: input1,
             inputs: None.into_iter(),
+            outputs: Vec::new(),
         };
         computer.run().expect("Error while running program");
         assert_eq!(
@@ -79,6 +82,7 @@ mod tests {
             ip: 0,
             memory: input2,
             inputs: None.into_iter(),
+            outputs: Vec::new(),
         };
         computer.run().expect("Error while running program");
         assert_eq!(computer.memory, &[2, 0, 0, 0, 99].to_owned());
@@ -88,6 +92,7 @@ mod tests {
             ip: 0,
             memory: input3,
             inputs: None.into_iter(),
+            outputs: Vec::new(),
         };
         computer.run().expect("Error while running program");
         assert_eq!(computer.memory, &[2, 3, 0, 6, 99].to_owned());
@@ -97,6 +102,7 @@ mod tests {
             ip: 0,
             memory: input4,
             inputs: None.into_iter(),
+            outputs: Vec::new(),
         };
         computer.run().expect("Error while running program");
         assert_eq!(computer.memory, [2, 4, 4, 5, 99, 9801].to_owned());
@@ -106,6 +112,7 @@ mod tests {
             ip: 0,
             memory: input5,
             inputs: None.into_iter(),
+            outputs: Vec::new(),
         };
         computer.run().expect("Error while running program");
         assert_eq!(computer.memory, [30, 1, 1, 4, 2, 5, 6, 0, 99].to_owned());

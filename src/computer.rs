@@ -41,6 +41,7 @@ pub struct Computer<I: Iterator<Item = isize>> {
     pub ip: usize,
     pub memory: Vec<isize>,
     pub inputs: I,
+    pub outputs: Vec<isize>,
 }
 
 impl<I: Iterator<Item = isize>> Computer<I> {
@@ -79,7 +80,10 @@ impl<I: Iterator<Item = isize>> Computer<I> {
                 let result = self.inputs.next().expect("Need more inputs!");
                 self.store_with_mode(modes[0], result)?
             }
-            OpCode::Prt(modes) => println!("{}", self.read_with_mode(modes[0])?),
+            OpCode::Prt(modes) => {
+                let result = self.read_with_mode(modes[0])?;
+                self.outputs.push(result)
+            }
             OpCode::End => return Ok(false),
             OpCode::Err => return Err("Read a wrong opcode"),
         }
@@ -87,10 +91,14 @@ impl<I: Iterator<Item = isize>> Computer<I> {
         Ok(true)
     }
 
-    pub fn run(&mut self) -> Result<(), &'static str> {
+    pub fn run(&mut self) -> Result<isize, &'static str> {
         loop {
             if !self.run_op_code()? {
-                return Ok(());
+                if self.outputs.len() > 0 {
+                    return Ok(self.outputs[self.outputs.len() - 1]);
+                } else {
+                    return Ok(0);
+                }
             }
         }
     }
