@@ -5,6 +5,10 @@ enum OpCode {
     Mul([bool; 3]),
     Sav([bool; 1]),
     Prt([bool; 1]),
+    Jnz([bool; 2]),
+    Jz([bool; 2]),
+    Leq([bool; 3]),
+    Eq([bool; 3]),
     End,
     Err,
 }
@@ -30,6 +34,10 @@ impl OpCode {
                 2 => Self::Mul(parse_modes(value / 100, [false; 3])),
                 3 => Self::Sav(parse_modes(value / 100, [false; 1])),
                 4 => Self::Prt(parse_modes(value / 100, [false; 1])),
+                5 => Self::Jnz(parse_modes(value / 100, [false; 2])),
+                6 => Self::Jz(parse_modes(value / 100, [false; 2])),
+                7 => Self::Leq(parse_modes(value / 100, [false; 3])),
+                8 => Self::Eq(parse_modes(value / 100, [false; 3])),
                 99 => Self::End,
                 _ => Self::Err,
             }
@@ -67,6 +75,7 @@ impl<I: Iterator<Item = isize>> Computer<I> {
 
     fn run_op_code(&mut self) -> Result<bool, &'static str> {
         let op_code = OpCode::from_isize(self.memory[self.ip]);
+        let mut jumped = false;
         match op_code {
             OpCode::Add(modes) => {
                 let result = self.read_with_mode(modes[0])? + self.read_with_mode(modes[1])?;
@@ -84,10 +93,48 @@ impl<I: Iterator<Item = isize>> Computer<I> {
                 let result = self.read_with_mode(modes[0])?;
                 self.outputs.push(result)
             }
+            OpCode::Jnz(modes) => {
+                let result = self.read_with_mode(modes[0])?;
+                let jump = self.read_with_mode(modes[1])?;
+                if result != 0 {
+                    self.ip =
+                        usize::try_from(jump).map_err(|_| "Jumping into a negative pointer!")?;
+                    jumped = true;
+                }
+            }
+            OpCode::Jz(modes) => {
+                let result = self.read_with_mode(modes[0])?;
+                let jump = self.read_with_mode(modes[1])?;
+                if result == 0 {
+                    self.ip =
+                        usize::try_from(jump).map_err(|_| "Jumping into a negative pointer!")?;
+                    jumped = true;
+                }
+            }
+            OpCode::Leq(modes) => {
+                let lhs = self.read_with_mode(modes[0])?;
+                let rhs = self.read_with_mode(modes[1])?;
+                if lhs < rhs {
+                    self.store_with_mode(modes[2], 1)?
+                } else {
+                    self.store_with_mode(modes[2], 0)?
+                }
+            }
+            OpCode::Eq(modes) => {
+                let lhs = self.read_with_mode(modes[0])?;
+                let rhs = self.read_with_mode(modes[1])?;
+                if lhs == rhs {
+                    self.store_with_mode(modes[2], 1)?
+                } else {
+                    self.store_with_mode(modes[2], 0)?
+                }
+            }
             OpCode::End => return Ok(false),
             OpCode::Err => return Err("Read a wrong opcode"),
         }
-        self.ip += 1;
+        if !jumped {
+            self.ip += 1
+        }
         Ok(true)
     }
 
@@ -101,5 +148,55 @@ impl<I: Iterator<Item = isize>> Computer<I> {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const INPUT: &[isize] = &[
+        3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0, 0,
+        1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20,
+        1105, 1, 46, 98, 99,
+    ];
+
+    #[test]
+    fn leq8() {
+        let input = INPUT.to_owned();
+        let mut computer = Computer {
+            ip: 0,
+            memory: input,
+            inputs: std::iter::once(7),
+            outputs: Vec::new(),
+        };
+        let value = computer.run().expect("Error while running program");
+        assert_eq!(value, 999);
+    }
+
+    #[test]
+    fn eq8() {
+        let input = INPUT.to_owned();
+        let mut computer = Computer {
+            ip: 0,
+            memory: input,
+            inputs: std::iter::once(8),
+            outputs: Vec::new(),
+        };
+        let value = computer.run().expect("Error while running program");
+        assert_eq!(value, 1000);
+    }
+
+    #[test]
+    fn geq8() {
+        let input = INPUT.to_owned();
+        let mut computer = Computer {
+            ip: 0,
+            memory: input,
+            inputs: std::iter::once(9),
+            outputs: Vec::new(),
+        };
+        let value = computer.run().expect("Error while running program");
+        assert_eq!(value, 1001);
     }
 }
